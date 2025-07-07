@@ -1,12 +1,19 @@
+-- Greg's Player Fly Script (KRNL-Ready)
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local CoreGui = game:GetService("CoreGui")
 
--- Setup GUI
+-- Clear previous UI if any
+if CoreGui:FindFirstChild("GregFlyGui") then
+    CoreGui.GregFlyGui:Destroy()
+end
+
+-- UI Setup
 local gui = Instance.new("ScreenGui")
 gui.Name = "GregFlyGui"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
-gui.Parent = game:GetService("CoreGui")
+gui.Parent = CoreGui
 
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, 260, 0, 320)
@@ -35,7 +42,7 @@ dropdown.Parent = frame
 local dropdownFrame = Instance.new("ScrollingFrame")
 dropdownFrame.Size = UDim2.new(1, -20, 0, 180)
 dropdownFrame.Position = UDim2.new(0, 10, 0, 80)
-dropdownFrame.CanvasSize = UDim2.new(0, 0, 0, 300)
+dropdownFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 dropdownFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 dropdownFrame.BorderSizePixel = 0
 dropdownFrame.Visible = false
@@ -57,34 +64,35 @@ flyButton.Font = Enum.Font.GothamBold
 flyButton.TextSize = 18
 flyButton.Parent = frame
 
-local selected = nil
+local selectedPlayer = nil
 
-local function refreshList()
+local function refreshPlayerList()
     dropdownFrame:ClearAllChildren()
-    for _, p in pairs(Players:GetPlayers()) do
+    local players = Players:GetPlayers()
+    for i, p in ipairs(players) do
         if p ~= LocalPlayer then
             local btn = Instance.new("TextButton")
             btn.Size = UDim2.new(1, 0, 0, 30)
+            btn.Position = UDim2.new(0, 0, 0, (i-1)*33)
             btn.Text = p.DisplayName .. " (" .. p.Name .. ")"
-            btn.TextColor3 = Color3.new(1,1,1)
-            btn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+            btn.TextColor3 = Color3.new(1, 1, 1)
+            btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
             btn.Font = Enum.Font.Gotham
             btn.TextSize = 16
             btn.Parent = dropdownFrame
 
             btn.MouseButton1Click:Connect(function()
-                selected = p
+                selectedPlayer = p
                 dropdown.Text = "Selected: " .. p.DisplayName
                 dropdownFrame.Visible = false
             end)
         end
     end
-    -- Update CanvasSize after populating
-    dropdownFrame.CanvasSize = UDim2.new(0,0,0,#Players:GetPlayers()*33)
+    dropdownFrame.CanvasSize = UDim2.new(0, 0, 0, #players * 33)
 end
 
-local function makeFly(char)
-    local hrp = char:FindFirstChild("HumanoidRootPart")
+local function makeFly(character)
+    local hrp = character and character:FindFirstChild("HumanoidRootPart")
     if hrp and not hrp:FindFirstChild("GregFlyForce") then
         local bv = Instance.new("BodyVelocity")
         bv.Name = "GregFlyForce"
@@ -95,8 +103,8 @@ local function makeFly(char)
     end
 end
 
-local function unFly(char)
-    local hrp = char:FindFirstChild("HumanoidRootPart")
+local function unFly(character)
+    local hrp = character and character:FindFirstChild("HumanoidRootPart")
     if hrp then
         local force = hrp:FindFirstChild("GregFlyForce")
         if force then
@@ -106,13 +114,15 @@ local function unFly(char)
 end
 
 flyButton.MouseButton1Click:Connect(function()
-    if selected and selected.Character then
-        local hrp = selected.Character:FindFirstChild("HumanoidRootPart")
+    if selectedPlayer and selectedPlayer.Character then
+        local hrp = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
         if hrp and hrp:FindFirstChild("GregFlyForce") then
-            unFly(selected.Character)
+            unFly(selectedPlayer.Character)
         else
-            makeFly(selected.Character)
+            makeFly(selectedPlayer.Character)
         end
+    else
+        warn("No player selected or player character missing.")
     end
 end)
 
@@ -120,11 +130,10 @@ dropdown.MouseButton1Click:Connect(function()
     dropdownFrame.Visible = not dropdownFrame.Visible
 end)
 
-Players.PlayerAdded:Connect(refreshList)
-Players.PlayerRemoving:Connect(refreshList)
+Players.PlayerAdded:Connect(refreshPlayerList)
+Players.PlayerRemoving:Connect(refreshPlayerList)
 
--- Initial list fill after a slight wait for players to load
 task.spawn(function()
     task.wait(1)
-    refreshList()
+    refreshPlayerList()
 end)
