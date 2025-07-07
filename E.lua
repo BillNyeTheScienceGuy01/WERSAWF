@@ -21,7 +21,7 @@ local selected = nil
 gui.Name = "GregFlyGui"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
-gui.Parent = game.CoreGui -- Changed to CoreGui for full visibility
+gui.Parent = game:GetService("CoreGui")
 
 frame.Size = UDim2.new(0, 260, 0, 320)
 frame.Position = UDim2.new(0.5, -130, 0.1, 0)
@@ -94,13 +94,14 @@ end
 
 -- REFRESH PLAYER LIST
 local function refreshList()
+	task.wait(0.5) -- slight delay to ensure players load
 	dropdownFrame:ClearAllChildren()
 	layout.Parent = dropdownFrame
 	for _, p in ipairs(Players:GetPlayers()) do
 		if p ~= LocalPlayer then
 			local b = Instance.new("TextButton")
 			b.Size = UDim2.new(1, 0, 0, 30)
-			b.Text = p.Name
+			b.Text = p.DisplayName .. " (" .. p.Name .. ")"
 			b.TextColor3 = Color3.new(1, 1, 1)
 			b.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 			b.Font = Enum.Font.Gotham
@@ -108,7 +109,7 @@ local function refreshList()
 			b.Parent = dropdownFrame
 			b.MouseButton1Click:Connect(function()
 				selected = p
-				dropdown.Text = "Selected: " .. p.Name
+				dropdown.Text = "Selected: " .. p.DisplayName
 				dropdownFrame.Visible = false
 			end)
 		end
@@ -134,4 +135,5 @@ end)
 -- PLAYER LIST LISTENERS
 Players.PlayerAdded:Connect(refreshList)
 Players.PlayerRemoving:Connect(refreshList)
+task.wait(1)
 refreshList()
