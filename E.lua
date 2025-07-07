@@ -18,11 +18,10 @@ local flyButton = Instance.new("TextButton")
 local selected = nil
 
 -- GUI SETTINGS
-if gui then
-	gui.Name = "GregFlyGui"
-	gui.ResetOnSpawn = false
-	gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-end
+gui.Name = "GregFlyGui"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.Parent = game.CoreGui -- Changed to CoreGui for full visibility
 
 frame.Size = UDim2.new(0, 260, 0, 320)
 frame.Position = UDim2.new(0.5, -130, 0.1, 0)
@@ -50,7 +49,7 @@ dropdown.Parent = frame
 -- SCROLLING FRAME FOR PLAYER LIST
 dropdownFrame.Size = UDim2.new(1, -20, 0, 180)
 dropdownFrame.Position = UDim2.new(0, 10, 0, 80)
-dropdownFrame.CanvasSize = UDim2.new(0, 0, 5, 0)
+dropdownFrame.CanvasSize = UDim2.new(0, 0, 0, 300)
 dropdownFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 dropdownFrame.BorderSizePixel = 0
 dropdownFrame.Visible = false
